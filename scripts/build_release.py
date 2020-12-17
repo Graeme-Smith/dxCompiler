@@ -19,7 +19,7 @@ top_dir = os.path.dirname(os.path.abspath(here))
 HOME_REGION = "aws:us-east-1"
 URL_DURATION = 60 * 60 * 24
 SLEEP_TIME = 5
-COPY_FILE_APP_NAME = "dxcompiler_copy"
+COPY_FILE_APP_NAME = "dxwdl_copy"
 COPY_FILE_APP = dxpy.find_one_app(zero_ok=False, more_ok=False, name=COPY_FILE_APP_NAME, return_handler=True)
 NUM_RETRIES = 1
 
@@ -229,19 +229,20 @@ def main():
     home_ad = util.build(project, folder, version_id, top_dir, path_dict)
 
     if multi_region:
-        for (assetName, asset_id) in home_ad.asset_ids.items():
-            home_rec = dxpy.DXRecord(asset_id)
-            all_regions = project_dict.keys()
+        for lang, asset_desc in home_ad.items():
+            for (assetName, asset_id) in home_ad.asset_id.items():
+                home_rec = dxpy.DXRecord(asset_id)
+                all_regions = project_dict.keys()
 
-            # Leave only regions where the asset is missing
-            target_regions = []
-            for dest_region in all_regions:
-                dest_proj = util.get_project(project_dict[dest_region])
-                dest_asset = util.find_asset(dest_proj, folder, assetName)
-                if dest_asset == None:
-                    target_regions.append(dest_region)
+                # Leave only regions where the asset is missing
+                target_regions = []
+                for dest_region in all_regions:
+                    dest_proj = util.get_project(project_dict[dest_region])
+                    dest_asset = util.find_asset(dest_proj, folder, assetName)
+                    if dest_asset == None:
+                        target_regions.append(dest_region)
 
-            _clone_asset(home_rec, folder, target_regions, project_dict)
+                _clone_asset(home_rec, folder, target_regions, project_dict)
 
 if __name__ == '__main__':
     main()

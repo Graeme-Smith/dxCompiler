@@ -306,9 +306,12 @@ def build(project, folder, version_id, top_dir, path_dict, dependencies=None, fo
             shutil.rmtree(os.path.join(top_dir, "applet_resources", lang.upper()))
 
     region = dxpy.describe(project.get_id())['region']
-    asset_descs = [
+    asset_descs = dict(
         (lang, AssetDesc(region, asset.get_id(), project))
         for (lang, asset) in assets.items()
-    ]
+    )
+    print("asset_descs")
+    print(asset_descs)
+    print("---")
 
     return asset_descs
