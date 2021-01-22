@@ -53,7 +53,7 @@ object Type {
     * Represents a String that is restricted to the specified values.
     * @param allowedValues set of allowed strings in enum
     */
-  case class TEnum(allowedValues: Set[String]) extends PrimitiveType
+  case class TEnum(allowedValues: Vector[String]) extends PrimitiveType
 
   @tailrec
   def isPrimitive(t: Type): Boolean = {

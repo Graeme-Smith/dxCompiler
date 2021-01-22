@@ -66,6 +66,17 @@ case class CwlTranslatorFactory() extends TranslatorFactory {
                       fileResolver: FileSourceResolver,
                       dxApi: DxApi,
                       logger: Logger): Option[Translator] = {
+    lazy val basePath = fileResolver.localSearchPath match {
+      case Vector()     => sourceFile.toAbsolutePath.getParent
+      case Vector(path) => path
+      case v =>
+        logger.warning(
+            s"CWL parser can only use a single import directory; ignoring ${v.tail.mkString(",")}"
+        )
+        v.head
+    }
+    lazy val parser =
+      Parser.create(baseUri = Some(basePath.toUri.toString), hintSchemas = Vector(DxHintSchema))
     if (language.isDefined) {
       // if language is specified, make sure it is CWL 1.2
       val ver =
@@ -78,11 +89,11 @@ case class CwlTranslatorFactory() extends TranslatorFactory {
       if (ver != CWLVersion.V1_2) {
         throw new Exception(s"dxCompiler does not support CWL version ${ver}")
       }
-    } else if (!Parser.canParse(sourceFile)) {
+    } else if (!parser.canParse(sourceFile)) {
       // otherwise make sure the file is parseable as CWL
       return None
     }
-    val tool = Parser.parseFile(sourceFile, hintSchemas = Vector(DxHintSchema)) match {
+    val tool = parser.parseFile(sourceFile) match {
       case tool: CommandLineTool => tool
       case _ =>
         throw new Exception(s"Not a command line tool ${sourceFile}")
